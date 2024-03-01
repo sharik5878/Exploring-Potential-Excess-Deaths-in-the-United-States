@@ -1,0 +1,106 @@
+#Installing required packages
+#install.packages(c("tm", "ggplot2", "e1071", "caret", "quanteda", "irlba", "randomForest"))
+
+#Reading cdcgov.csv data 
+Causeofdeath <- read.csv("C:/Users/Sharik Shaik/OneDrive/Desktop/Sem 2/HI 7072/Final Project/R/cdcgov.csv", stringsAsFactors=FALSE)
+
+#Below is the command to get the internal structure of the dataframe Causeofdeath
+str(Causeofdeath)
+
+
+#Loading the required library for the Bar chart to be created.
+library(ggplot2)
+
+
+#Preprocessing
+Causeofdeath1 <- paste(Causeofdeath$Description_about_the_Cause_of_Death, collapse=" ")
+Causeofdeath1
+
+#Below command is to install the text mining packages to perform preprocessing methods
+#install.packages("tm", dependencies=TRUE)
+
+# Below command is to read the required packages from natural language processing and text mining before doing actual steps
+library(NLP)  
+library(tm)
+
+
+#In the below command, VectorSource is used to create a source from the vector 'Causeofdeath1'.
+#Causeofdeath1' is expected to contain text data, where each element represents a document.
+#In the below command,Corpus function is applied to the VectorSource to create a text corpus.
+#Each element in 'Causeofdeath1' is treated as a separate document in the corpus.
+source <-VectorSource(Causeofdeath1)
+corpus <- Corpus(source)
+
+#Below command is for removing the english stopwords like He, she, these, her, those, have etc.. with the help of textmining function tm_map
+corpus <-tm_map(corpus, removeWords, stopwords("english"))
+stopwords('ENGLISH')
+
+#Inspecting the corpus after performing the preprocessing method
+inspect(corpus)
+
+#Below command is for removing punctuation with the help of textmining function tm_map
+corpus <-tm_map(corpus,removePunctuation)
+inspect(corpus)
+
+#Below command is for removing the whitespace and replacing it with single space with the help of textmining function tm_map
+corpus <-tm_map(corpus, stripWhitespace)
+inspect(corpus)
+
+#Below command is for converting all the characters into lowercase with the help of textmining function tm_map
+corpus <-tm_map(corpus, content_transformer(tolower))
+
+corpus <- tm_map(corpus, removeWords, c("the"))
+
+inspect(corpus)
+
+
+
+#In the below command,DocumentTermMatrix function is used to convert the 'corpus' (a text corpus) into a document-term matrix ('textmining').
+#as.matrix function is applied to convert the document-term matrix ('textmining') into a standard R matrix ('textmining1').This matrix representation allows for easier manipulation and analysis.
+textmining <-DocumentTermMatrix(corpus)
+textmining1 <-as.matrix(textmining)
+textmining1
+
+#below command is to get the frequency of the most used words using the colSums function
+frequency <-colSums(textmining1)
+frequency <-sort(frequency, decreasing=TRUE)
+str(frequency)
+frequency
+
+
+head(frequency)
+
+#sorting the textmining1 accordingly in the descending order
+textmining1_sort <-sort(colSums(textmining1), decreasing=TRUE)
+textmining_df <-data.frame(word=names(textmining1_sort),freq=textmining1_sort)
+textmining_df
+
+# Adding different colours to each bar.
+bar_colors <- c("red", "blue", "green", "purple", "orange")
+
+# TO fit the plot on the screen correctly.
+par(mar=c(5, 5, 4, 2) + 0.1)
+
+#Below is the command to plot a bar graph
+barplot(textmining_df[1:5,]$freq, las=2, names.arg=textmining_df[1:5,]$word,
+        col=bar_colors, main="Top 5 most frequent words",
+        ylab="word frequencies")
+        
+
+
+
+
+#Word Cloud
+
+#Below is the command to install the wordcloud package
+install.packages("wordcloud")
+
+#Reading wordcloud package
+library(wordcloud)
+
+#Below is the command to load the names of the most frequent words into the words dataframe
+words<-names(frequency)
+
+#Below is the command for creating the word cloud of top 20 most frequent words
+wordcloud(words[1:20], frequency[1:20])
+wordcloud

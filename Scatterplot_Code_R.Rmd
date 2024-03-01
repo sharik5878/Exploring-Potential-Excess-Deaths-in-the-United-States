@@ -1,0 +1,30 @@
+#Calling the library ggplot2
+library(ggplot2)
+
+#Reading the dataset "NCHS_-_Potentially_Excess_Deaths_from_the_Five_Leading_Causes_of_Death.csv" from my computer to the dataframe deaths_data
+deaths_data <- read.csv("C:/Users/Sharik Shaik/OneDrive/Desktop/Sem 2/HI 7072/Final Project/R/NCHS_-_Potentially_Excess_Deaths_from_the_Five_Leading_Causes_of_Death.csv")
+
+# Below command filters the data for Heart disease Cause_of_Death
+heart_disease_data <- subset(deaths_data, Cause_of_Death == "Heart Disease")
+
+
+# Below commands plot Scatter plot for correlation between observed deaths and expected deaths for Heart Disease
+ggplot(heart_disease_data, aes(x = Observed_Deaths, y = Expected_Deaths)) +
+  geom_point(color = "red",alpha=0.5) +
+  labs(title = "Correlation Between Observed Deaths and Expected Deaths for Heart Disease", x = "Observed Deaths", y = "Expected Deaths")+geom_smooth(method = "lm",color="black")
+  
+#Below commmand is to create a linera regression model using lm method
+model <- lm(Expected_Deaths ~ Observed_Deaths, data = heart_disease_data)
+
+# I used the below command to show the regression line equation, R-squared, and p-value
+summary_model <- summary(model)
+equation <- as.character(signif(summary_model$coefficients[2, c("Estimate", "Pr(>|t|)"), drop = FALSE], digits = 4))
+equation <- paste("y =", equation[1], "* x +", equation[2])
+
+# Below command is to Print the regression line equation, R-squared, and p-value
+cat("Regression Line Equation:", equation, "\n")
+cat("R-squared:", signif(summary_model$r.squared, digits = 4), "\n")
+cat("P-value:", signif(summary_model$coefficients[2, "Pr(>|t|)"], digits = 4), "\n")
+
+# Displaying the plot
+print(plot)

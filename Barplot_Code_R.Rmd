@@ -1,0 +1,23 @@
+# Load the required libraries ggplot2 and dplyr
+library(ggplot2)
+library(dplyr)
+
+#Reading my datset in to the data frame.
+barchart <- read.csv("C:/Users/Sharik Shaik/OneDrive/Desktop/Sem 2/HI 7072/Final Project/R/NCHS_-_Potentially_Excess_Deaths_from_the_Five_Leading_Causes_of_Death.csv")
+
+
+# I have filtered the top 5 states of excess deaths using below commands by removing the united states using filter as it indicates the whole numbers of US 
+top_states <- barchart %>%
+  filter(State != "United States") %>%
+  group_by(State) %>%
+  summarize(Total_Potentially_Excess_Deaths = sum(Potentially_Excess_Deaths)) %>%
+  top_n(5, Total_Potentially_Excess_Deaths) %>%
+  pull(State)
+
+top5states <- barchart %>%
+  filter(State %in% top_states)
+
+# Plotted Bar chart for number of excess deaths in each state for each cause (top 5 states) by using below command
+ggplot(top5states, aes(x = State, y = Potentially_Excess_Deaths, fill = Cause_of_Death)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Number of Excess Deaths in Each State for Each Cause (Top 5 States)", x = "State", y = "Potentially Excess Deaths")

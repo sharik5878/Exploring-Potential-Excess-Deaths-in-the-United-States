@@ -1,0 +1,51 @@
+#Below is the command for installing the packages that are required for the map to be produced
+install.packages(c("mapproj", "maps", "tidyverse", "plotly"))
+
+#Below are the commands to load the packages
+#This package gives us a database of geographical maps for various regions
+library(maps)
+#This package gives us projection functions for geographical maps.
+library(mapproj)
+#This package is used for data manipulation and visualization.
+library(tidyverse)
+#This package is used to create a interactive map in this assignment.
+library(plotly)
+
+#Below command is used to get a data frame which has coordinates for plotting the boundaries of states in the United States.
+states <- map_data("state")
+
+#Below command is used to read my data set from my system into a new data frame called deaths.
+deaths <- read.csv("C:/Users/Sharik Shaik/OneDrive/Desktop/Sem 2/HI 7072/Final Project/R/NCHS_-_Potentially_Excess_Deaths_from_the_Five_Leading_Causes_of_Death_1.csv")
+
+#Below is the command reading the data from deaths dataset to all_deaths dataset to avoid confusion.
+all_deaths <- deaths
+
+#Here in the below command i have changed all the column names of all_deaths dataset into lowercase to match the region column name of states dataframe.
+names(all_deaths) <- tolower(names(all_deaths))
+
+#This command makes all the values of region column of all_deaths dataframe into lowercase to match with the region column values of states dataframe so that we can merge the data by region column.
+all_deaths$region <- tolower(all_deaths$region)
+
+#Here in the below command i have merged both the dataset all_deaths and states based on the common column called region.
+usaexcessdeathsdata <- states %>% merge(all_deaths, by = "region")
+
+#In the below command, ggplot line indicates initializing a ggplot object using the data frame usaexcessdeathsdata, aes() function is used to define aesthetics x as longitude and y as latitude and the text is used to display the state name and deaths in that particular state when hovering over each state.
+
+#geom_polygon function is used to draw the state boundaries. scale_fill_gradient the color gradient for the fill aesthetic. It specifies that lower values of deaths should be represented with lighter green (low = "yellow") and higher values with darker green (high = "orange").
+
+#coord_map() adjusts the map to the desired projection. It's often used after geom_polygon to ensure that the map is displayed in a readable format.theme_void() function sets the theme of the plot to a blank canvas without any axis labels or background.
+
+usaexcessdeathsplot <- ggplot(usaexcessdeathsdata, aes(x = long, y = lat, text = paste("State: ", region, "<br>Excess Deaths: ", potentially_excess_deaths))) +
+  geom_polygon(aes(group = group, fill = potentially_excess_deaths)) +
+  scale_fill_gradient(low = "yellow", high = "orange") +
+  coord_map() +
+  theme_void() +
+  labs(title = "Excess Deaths in non metropolitan localities of US - 2013",
+       x = "Longitude",
+       y = "Latitude")
+
+#Used ggplotly to make the map interactive
+usaexcessdeathsplot <- ggplotly(usaexcessdeathsplot, tooltip = "text")
+
+# I have displayed the interactive map with below command
+print(usaexcessdeathsplot)
